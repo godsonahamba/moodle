@@ -23,5 +23,10 @@
 * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 */
 
+$string['active'] = 'Active';
+$string['contentselected'] = 'Content selected';
 $string['ltix'] = 'LTIx';
+$string['pending'] = 'Pending';
 $string['privacy:metadata'] = 'The LTIx subsystem does not store any personal data.';
+$string['rejected'] = 'Rejected';
+$string['unknownstate'] = 'Unknown state';

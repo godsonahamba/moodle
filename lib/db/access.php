@@ -2741,4 +2741,34 @@ $capabilities = array(
             'manager' => CAP_ALLOW,
         ]
     ],
+
+    // The ability to create or edit tool configurations for particular courses.
+    'moodle/ltix:addcoursetool' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        )
+    ),
+
+    // The ability to a preconfigured instance to the course.
+    'moodle/ltix:addpreconfiguredinstance' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ),
+    ),
+
+    // The ability to add a manual instance (i.e. not from a preconfigured tool) to the course.
+    'moodle/ltix:addmanualinstance' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ),
+    ),
 );
