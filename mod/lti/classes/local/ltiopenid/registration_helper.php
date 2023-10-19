@@ -130,8 +130,8 @@ class registration_helper {
 
         $targetlinkuri = $targetlinkuri ?: 'https://'.$domain;
         // Stripping www as this is ignored for domain matching.
-        $domain = lti_get_domain_from_url($domain);
-        if ($domain !== lti_get_domain_from_url($targetlinkuri)) {
+        $domain = \core_ltix\tool_helper::get_domain_from_url($domain);
+        if ($domain !== \core_ltix\tool_helper::get_domain_from_url($targetlinkuri)) {
             throw new registration_exception('domain_targetlinkuri_mismatch', 400);
         }
 
@@ -385,7 +385,7 @@ class registration_helper {
             }
             $response['clientid'] = $clientid;
         } else if ($registrationtoken->scope == self::REG_TOKEN_OP_UPDATE_REG) {
-            $tool = lti_get_type($registrationtoken->sub);
+            $tool = \core_ltix\types_helper::get_type($registrationtoken->sub);
             if (!$tool) {
                 throw new registration_exception("Unknown client", 400);
             }
@@ -404,7 +404,7 @@ class registration_helper {
      */
     public function lti_get_service_scopes() {
 
-        $services = lti_get_services();
+        $services = \core_ltix\tool_helper::get_services();
         $scopes = array();
         foreach ($services as $service) {
             $servicescopes = $service->get_scopes();
@@ -444,6 +444,6 @@ class registration_helper {
      * @return mixed Tool Proxy details
      */
     public function get_tool_proxy(int $proxyid) : array {
-        return lti_get_tool_proxy($proxyid);
+        return \core_ltix\tool_helper::get_tool_proxy($proxyid);
     }
 }

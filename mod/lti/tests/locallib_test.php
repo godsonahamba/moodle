@@ -74,10 +74,15 @@ class locallib_test extends mod_lti_testcase {
      */
     public function test_split_parameters() {
         $this->assertEquals(lti_split_parameters(''), array());
+        $this->assertDebuggingCalled();
         $this->assertEquals(lti_split_parameters('a=1'), array('a' => '1'));
+        $this->assertDebuggingCalled();
         $this->assertEquals(lti_split_parameters("a=1\nb=2"), array('a' => '1', 'b' => '2'));
+        $this->assertDebuggingCalled();
         $this->assertEquals(lti_split_parameters("a=1\n\rb=2"), array('a' => '1', 'b' => '2'));
+        $this->assertDebuggingCalled();
         $this->assertEquals(lti_split_parameters("a=1\r\nb=2"), array('a' => '1', 'b' => '2'));
+        $this->assertDebuggingCalled();
     }
 
     public function test_split_custom_parameters() {
@@ -89,10 +94,12 @@ class locallib_test extends mod_lti_testcase {
         $tool->ltiversion = 'LTI-1p0';
         $this->assertEquals(lti_split_custom_parameters(null, $tool, array(), "x=1\ny=2", false),
             array('custom_x' => '1', 'custom_y' => '2'));
+        $this->assertDebuggingCalled();
 
         // Check params with caps.
         $this->assertEquals(lti_split_custom_parameters(null, $tool, array(), "X=1", true),
             array('custom_x' => '1', 'custom_X' => '1'));
+        $this->assertDebuggingCalled();
 
         // Removed repeat of previous test with a semicolon separator.
 
@@ -100,18 +107,21 @@ class locallib_test extends mod_lti_testcase {
             array(
                 'custom_review_chapter' => '1.2.56',
                 'custom_Review:Chapter' => '1.2.56'));
+        $this->assertDebuggingCalled();
 
         $this->assertEquals(lti_split_custom_parameters(null, $tool, array(),
             'Complex!@#$^*(){}[]KEY=Complex!@#$^*;(){}[]½Value', true),
             array(
                 'custom_complex____________key' => 'Complex!@#$^*;(){}[]½Value',
                 'custom_Complex!@#$^*(){}[]KEY' => 'Complex!@#$^*;(){}[]½Value'));
+        $this->assertDebuggingCalled();
 
         // Test custom parameter that returns $USER property.
         $user = $this->getDataGenerator()->create_user(array('middlename' => 'SOMETHING'));
         $this->setUser($user);
         $this->assertEquals(array('custom_x' => '1', 'custom_y' => 'SOMETHING'),
             lti_split_custom_parameters(null, $tool, array(), "x=1\ny=\$Person.name.middle", false));
+        $this->assertDebuggingCalled();
     }
 
     /**
@@ -132,7 +142,7 @@ class locallib_test extends mod_lti_testcase {
         $requestparams = array('resource_link_id' => '123', 'resource_link_title' => 'Weekly Blog', 'user_id' => '789',
             'roles' => 'Learner', 'context_id' => '12345', 'context_label' => 'SI124', 'context_title' => 'Social Computing');
 
-        $parms = lti_sign_parameters($requestparams, 'http://www.imsglobal.org/developer/LTI/tool.php', 'POST',
+        $parms = \core_ltix\oauth_helper::sign_parameters($requestparams, 'http://www.imsglobal.org/developer/LTI/tool.php', 'POST',
             'lmsng.school.edu', 'secret', 'Click Me', 'lmsng.school.edu' /*, $org_desc*/);
         $this->assertTrue(isset($parms['oauth_nonce']));
         $this->assertTrue(isset($parms['oauth_signature']));
@@ -196,8 +206,11 @@ class locallib_test extends mod_lti_testcase {
 
     public function test_lti_ensure_url_is_https() {
         $this->assertEquals('https://moodle.org', lti_ensure_url_is_https('http://moodle.org'));
+        $this->assertDebuggingCalled();
         $this->assertEquals('https://moodle.org', lti_ensure_url_is_https('moodle.org'));
+        $this->assertDebuggingCalled();
         $this->assertEquals('https://moodle.org', lti_ensure_url_is_https('https://moodle.org'));
+        $this->assertDebuggingCalled();
     }
 
     /**
@@ -206,14 +219,23 @@ class locallib_test extends mod_lti_testcase {
     public function test_lti_get_url_thumbprint() {
         // Note: trailing and double slash are expected right now.  Must evaluate if it must be removed at some point.
         $this->assertEquals('moodle.org/', lti_get_url_thumbprint('http://MOODLE.ORG'));
+        $this->assertDebuggingCalled();
         $this->assertEquals('moodle.org/', lti_get_url_thumbprint('http://www.moodle.org'));
+        $this->assertDebuggingCalled();
         $this->assertEquals('moodle.org/', lti_get_url_thumbprint('https://www.moodle.org'));
+        $this->assertDebuggingCalled();
         $this->assertEquals('moodle.org/', lti_get_url_thumbprint('moodle.org'));
+        $this->assertDebuggingCalled();
         $this->assertEquals('moodle.org//this/is/moodle', lti_get_url_thumbprint('http://moodle.org/this/is/moodle'));
+        $this->assertDebuggingCalled();
         $this->assertEquals('moodle.org//this/is/moodle', lti_get_url_thumbprint('https://moodle.org/this/is/moodle'));
+        $this->assertDebuggingCalled();
         $this->assertEquals('moodle.org//this/is/moodle', lti_get_url_thumbprint('moodle.org/this/is/moodle'));
+        $this->assertDebuggingCalled();
         $this->assertEquals('moodle.org//this/is/moodle', lti_get_url_thumbprint('moodle.org/this/is/moodle?'));
+        $this->assertDebuggingCalled();
         $this->assertEquals('moodle.org//this/is/moodle?foo=bar', lti_get_url_thumbprint('moodle.org/this/is/moodle?foo=bar'));
+        $this->assertDebuggingCalled();
     }
 
     /*
@@ -302,6 +324,7 @@ class locallib_test extends mod_lti_testcase {
 
         // Try when the forcessl config property is not set.
         lti_prepare_type_for_save($type, $config);
+        $this->assertDebuggingCalled();
         $this->assertObjectHasAttribute('lti_forcessl', $config);
         $this->assertEquals(0, $config->lti_forcessl);
         $this->assertEquals(0, $type->forcessl);
@@ -309,6 +332,7 @@ class locallib_test extends mod_lti_testcase {
         // Try when forcessl config property is set.
         $config->lti_forcessl = 1;
         lti_prepare_type_for_save($type, $config);
+        $this->assertDebuggingCalled();
         $this->assertObjectHasAttribute('lti_forcessl', $config);
         $this->assertEquals(1, $config->lti_forcessl);
         $this->assertEquals(1, $type->forcessl);
@@ -316,6 +340,7 @@ class locallib_test extends mod_lti_testcase {
         // Try when forcessl config property is set to 0.
         $config->lti_forcessl = 0;
         lti_prepare_type_for_save($type, $config);
+        $this->assertDebuggingCalled();
         $this->assertObjectHasAttribute('lti_forcessl', $config);
         $this->assertEquals(0, $config->lti_forcessl);
         $this->assertEquals(0, $type->forcessl);
@@ -374,9 +399,9 @@ class locallib_test extends mod_lti_testcase {
         $type->toolproxyid = $proxy->id;
         $type->baseurl = $this->getExternalTestFileUrl('/test.html');
 
-        $typeid = lti_add_type($type, $data);
+        $typeid = \core_ltix\types_helper::add_type($type, $data);
 
-        $typeconfig = lti_get_type_config($typeid);
+        $typeconfig = \core_ltix\types_helper::get_type_config($typeid);
 
         $course = $this->getDataGenerator()->create_course();
         $returnurl = new \moodle_url('/');
@@ -475,7 +500,7 @@ class locallib_test extends mod_lti_testcase {
         $type->description = "Example description";
         $type->baseurl = $this->getExternalTestFileUrl('/test.html');
 
-        $typeid = lti_add_type($type, $data);
+        $typeid = \core_ltix\types_helper::add_type($type, $data);
         $course = $this->getDataGenerator()->create_course();
         $returnurl = new \moodle_url('/');
 
@@ -502,7 +527,7 @@ class locallib_test extends mod_lti_testcase {
         $type->description = "Example description";
         $type->baseurl = $this->getExternalTestFileUrl('/test.html');
 
-        $typeid = lti_add_type($type, $data);
+        $typeid = \core_ltix\types_helper::add_type($type, $data);
         $course = $this->getDataGenerator()->create_course();
         $returnurl = new \moodle_url('/');
 
@@ -620,6 +645,7 @@ class locallib_test extends mod_lti_testcase {
      */
     public function test_lti_get_best_tool_by_url($url, $expected, $tools) {
         $actual = lti_get_best_tool_by_url($url, $tools, null);
+        $this->assertDebuggingCalled();
         $this->assertSame($expected, $actual);
     }
 
@@ -653,6 +679,7 @@ class locallib_test extends mod_lti_testcase {
         ]);
 
         $records = lti_get_tools_by_domain('example.com', LTI_TOOL_STATE_CONFIGURED);
+        $this->assertDebuggingCalled();
         $this->assertCount(1, $records);
         $this->assertEmpty(array_diff(
             ['https://example.com/i/am/?where=here'],
@@ -709,6 +736,7 @@ class locallib_test extends mod_lti_testcase {
 
         // Get tool types for domain 'exampleone' in course 1 and verify only the one result under course category 1 is included.
         $records = lti_get_tools_by_domain('exampleone.com', LTI_TOOL_STATE_CONFIGURED, $course1->id);
+        $this->assertDebuggingCalled();
         $this->assertCount(1, $records);
         $this->assertEmpty(array_diff(
             ['https://exampleone.com/tool/1'],
@@ -717,6 +745,7 @@ class locallib_test extends mod_lti_testcase {
 
         // Get tool types for domain 'exampleone' in course 2 and verify only the one result under course category 2 is included.
         $records = lti_get_tools_by_domain('exampleone.com', LTI_TOOL_STATE_CONFIGURED, $course2->id);
+        $this->assertDebuggingCalled();
         $this->assertCount(1, $records);
         $this->assertEmpty(array_diff(
             ['https://exampleone.com/tool/2'],
@@ -725,6 +754,7 @@ class locallib_test extends mod_lti_testcase {
 
         // Get tool types for domain 'exampletwo' in course 1 and verify that no results are found.
         $records = lti_get_tools_by_domain('exampletwo.com', LTI_TOOL_STATE_CONFIGURED, $course1->id);
+        $this->assertDebuggingCalled();
         $this->assertCount(0, $records);
     }
 
@@ -1215,7 +1245,7 @@ MwIDAQAB
 
         $config->lti_keytype = LTI_RSA_KEY;
 
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         lti_verify_jwt_signature($typeid, '', 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4g' .
             'RG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.POstGetfAytaZS82wHcjoTyoqhMyxXiWdR7Nn7A29DNSl0EiXLdwJ6xC6AfgZWF1bOs' .
@@ -1244,7 +1274,7 @@ MwIDAQAB
 
         $config->lti_keytype = LTI_JWK_KEYSET;
 
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $jwt = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjU3YzExNzdkMmQ1M2EwMjFjNzM';
         $jwt .= '3NTY0OTFjMTM3YjE3In0.eyJpc3MiOiJnclJvbkd3RTd1WjRwZ28iLCJzdWIiOiJnclJvb';
@@ -1286,7 +1316,7 @@ MwIDAQAB
         $data = new \stdClass();
         $data->lti_contentitem = true;
 
-        $typeid = lti_add_type($type, $data);
+        $typeid = \core_ltix\types_helper::add_type($type, $data);
 
         $this->expectExceptionMessage('JWT security not supported with LTI 2');
         lti_verify_jwt_signature($typeid, '', '');
@@ -1309,7 +1339,7 @@ MwIDAQAB
         $type->baseurl = $this->getExternalTestFileUrl('/test.html');
 
         $config = new \stdClass();
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $this->expectExceptionMessage(get_string('errorincorrectconsumerkey', 'mod_lti'));
         lti_verify_jwt_signature($typeid, '', '');
@@ -1332,7 +1362,7 @@ MwIDAQAB
 
         $config = new \stdClass();
         $config->lti_keytype = LTI_RSA_KEY;
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $this->expectExceptionMessage('No public key configured');
         lti_verify_jwt_signature($typeid, 'consumerkey', '');
@@ -1420,6 +1450,7 @@ MwIDAQAB
         $expected->{$strgraph}[] = $objgraph2;
         $expected->{$strgraph}[] = $objgraph3;
 
+        $this->assertDebuggingCalled();
         $this->assertEquals($expected, $jsondecode);
     }
 
@@ -1435,7 +1466,7 @@ MwIDAQAB
         $type->baseurl = "http://example.com";
         $config = new \stdClass();
         $config->lti_acceptgrades = LTI_SETTING_DELEGATE;
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_lti');
         $contentitems = [];
@@ -1451,7 +1482,7 @@ MwIDAQAB
             'frame' => []
         ];
         $contentitemsjson13 = json_encode($contentitems);
-        $json11 = lti_convert_content_items($contentitemsjson13);
+        $json11 = \core_ltix\tool_helper::convert_content_items($contentitemsjson13);
 
         $config = lti_tool_configuration_from_content_item($typeid,
                                                            'ContentItemSelection',
@@ -1459,6 +1490,7 @@ MwIDAQAB
                                                            'ConsumerKey',
                                                            $json11);
 
+        $this->assertDebuggingCalled();
         $this->assertEquals($contentitems[0]['url'], $config->toolurl);
         $this->assertEquals(LTI_SETTING_ALWAYS, $config->instructorchoiceacceptgrades);
         $this->assertEquals($contentitems[0]['lineItem']['tag'], $config->lineitemtag);
@@ -1482,7 +1514,7 @@ MwIDAQAB
         $type->baseurl = "http://example.com";
         $config = new \stdClass();
         $config->lti_acceptgrades = LTI_SETTING_DELEGATE;
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $contentitems = [];
         $contentitems[] = [
@@ -1500,7 +1532,7 @@ MwIDAQAB
             'frame' => []
         ];
         $contentitemsjson13 = json_encode($contentitems);
-        $json11 = lti_convert_content_items($contentitemsjson13);
+        $json11 = \core_ltix\tool_helper::convert_content_items($contentitemsjson13);
 
         $config = lti_tool_configuration_from_content_item($typeid,
                                                            'ContentItemSelection',
@@ -1508,6 +1540,7 @@ MwIDAQAB
                                                            'ConsumerKey',
                                                            $json11);
 
+        $this->assertDebuggingCalled();
         $this->assertEquals('DEFAULT', $config->lineitemsubreviewurl);
         $this->assertEquals('', $config->lineitemsubreviewparams);
     }
@@ -1526,7 +1559,7 @@ MwIDAQAB
         $type->baseurl = "http://example.com";
         $config = new \stdClass();
         $config->lti_acceptgrades = LTI_SETTING_DELEGATE;
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $contentitems = [];
         $contentitems[] = [
@@ -1542,7 +1575,7 @@ MwIDAQAB
             'frame' => []
         ];
         $contentitemsjson13 = json_encode($contentitems);
-        $json11 = lti_convert_content_items($contentitemsjson13);
+        $json11 = \core_ltix\tool_helper::convert_content_items($contentitemsjson13);
 
         $config = lti_tool_configuration_from_content_item($typeid,
                                                            'ContentItemSelection',
@@ -1550,6 +1583,7 @@ MwIDAQAB
                                                            'ConsumerKey',
                                                            $json11);
 
+        $this->assertDebuggingCalled();
         $this->assertEquals($contentitems[0]['url'], $config->toolurl);
         $this->assertEquals(LTI_SETTING_ALWAYS, $config->instructorchoiceacceptgrades);
         $this->assertEquals($contentitems[0]['lineItem']['tag'], $config->lineitemtag);
@@ -1571,7 +1605,7 @@ MwIDAQAB
         $type->baseurl = "http://example.com";
         $config = new \stdClass();
         $config->lti_acceptgrades = LTI_SETTING_DELEGATE;
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_lti');
         $contentitems = [];
@@ -1602,13 +1636,14 @@ MwIDAQAB
             'frame' => []
         ];
         $contentitemsjson13 = json_encode($contentitems);
-        $json11 = lti_convert_content_items($contentitemsjson13);
+        $json11 = \core_ltix\tool_helper::convert_content_items($contentitemsjson13);
 
         $config = lti_tool_configuration_from_content_item($typeid,
                                                            'ContentItemSelection',
                                                            $type->ltiversion,
                                                            'ConsumerKey',
                                                            $json11);
+        $this->assertDebuggingCalled();
         $this->assertNotNull($config->multiple);
         $this->assertEquals(2, count( $config->multiple ));
         $this->assertEquals($contentitems[0]['title'], $config->multiple[0]->name);
@@ -1634,7 +1669,7 @@ MwIDAQAB
         $type->name = "Test tool";
         $type->baseurl = "http://example.com";
         $config = new \stdClass();
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_lti');
         $contentitems = [];
@@ -1650,13 +1685,14 @@ MwIDAQAB
             'frame' => []
         ];
         $contentitemsjson13 = json_encode($contentitems);
-        $json11 = lti_convert_content_items($contentitemsjson13);
+        $json11 = \core_ltix\tool_helper::convert_content_items($contentitemsjson13);
 
         $config = lti_tool_configuration_from_content_item($typeid,
                                                            'ContentItemSelection',
                                                            $type->ltiversion,
                                                            'ConsumerKey',
                                                            $json11);
+        $this->assertDebuggingCalled();
         $this->assertEquals($contentitems[0]['title'], $config->name);
         $this->assertEquals($contentitems[0]['text'], $config->introeditor['text']);
         $this->assertEquals($contentitems[0]['url'], $config->toolurl);
@@ -1682,7 +1718,7 @@ MwIDAQAB
         $type->baseurl = $this->getExternalTestFileUrl('/test.html');
 
         $config = new \stdClass();
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $params = [];
         $params['roles'] = 'urn:lti:role:ims/lis/testrole,' .
@@ -1739,7 +1775,7 @@ MwIDAQAB
 -----END PUBLIC KEY-----';
         $config->lti_keytype = LTI_RSA_KEY;
 
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $params = lti_convert_from_jwt($typeid, 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwib' .
             'mFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMiwiaXNzIjoic3NvLmV4YW1wbGUuY29tIn0.XURVvEb5ueAvFsn-S9EB' .
@@ -1769,11 +1805,11 @@ MwIDAQAB
         $typeconfig = new \stdClass();
         $typeconfig->lti_acceptgrades = true;
 
-        $typeid = lti_add_type($type, $typeconfig);
+        $typeid = \core_ltix\types_helper::add_type($type, $typeconfig);
 
-        $tool = lti_get_type($typeid);
+        $tool = \core_ltix\types_helper::get_type($typeid);
 
-        $config = lti_get_type_config($typeid);
+        $config = \core_ltix\types_helper::get_type_config($typeid);
         $permittedscopes = lti_get_permitted_service_scopes($tool, $config);
 
         $expected = [
@@ -1800,9 +1836,9 @@ MwIDAQAB
 
         $config = new \stdClass();
 
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
-        $type = lti_get_type($typeid);
+        $type = \core_ltix\types_helper::get_type($typeid);
 
         $typeconfig = get_tool_type_config($type);
 
@@ -1834,11 +1870,11 @@ MwIDAQAB
 
         $config = new \stdClass();
 
-        $typeid = lti_add_type($type, $config);
+        $typeid = \core_ltix\types_helper::add_type($type, $config);
 
         $scopes = ['lti_some_scope', 'lti_another_scope'];
 
-        lti_new_access_token($typeid, $scopes);
+        \core_ltix\types_helper::new_access_token($typeid, $scopes);
 
         $token = $DB->get_records('lti_access_tokens');
         $this->assertEquals(1, count($token));
@@ -1981,11 +2017,15 @@ MwIDAQAB
         $course->originalcourseid = $parentcourse->id;
         $DB->update_record('course', $course);
         $this->assertEquals(get_course_history($parentparentcourse), []);
+        $this->assertDebuggingCalled();
         $this->assertEquals(get_course_history($parentcourse), [$parentparentcourse->id]);
+        $this->assertDebuggingCalled();
         $this->assertEquals(get_course_history($course), [$parentcourse->id, $parentparentcourse->id]);
+        $this->assertDebuggingCalled();
         $course->originalcourseid = 38903;
         $DB->update_record('course', $course);
         $this->assertEquals(get_course_history($course), [38903]);
+        $this->assertDebuggingCalled();
     }
 
     /**
@@ -2094,6 +2134,7 @@ MwIDAQAB
         $this->generate_tool_types_and_proxies(10);
         list($proxies, $types) = lti_get_lti_types_and_proxies();
 
+        $this->assertDebuggingCalled();
         $this->assertCount(10, $proxies);
         $this->assertCount(10, $types);
     }
@@ -2109,18 +2150,21 @@ MwIDAQAB
         // Get the middle 10 data sets (of 20 total).
         list($proxies, $types) = lti_get_lti_types_and_proxies(10, 5);
 
+        $this->assertDebuggingCalled();
         $this->assertCount(5, $proxies);
         $this->assertCount(5, $types);
 
         // Get the last 5 data sets with large limit (of 20 total).
         list($proxies, $types) = lti_get_lti_types_and_proxies(50, 15);
 
+        $this->assertDebuggingCalled();
         $this->assertCount(0, $proxies);
         $this->assertCount(5, $types);
 
         // Get the last 13 data sets with large limit (of 20 total).
         list($proxies, $types) = lti_get_lti_types_and_proxies(50, 7);
 
+        $this->assertDebuggingCalled();
         $this->assertCount(3, $proxies);
         $this->assertCount(10, $types);
     }
@@ -2136,18 +2180,21 @@ MwIDAQAB
         // Get the first 10 data sets (of 15 total).
         list($proxies, $types) = lti_get_lti_types_and_proxies(10, 0, true);
 
+        $this->assertDebuggingCalled();
         $this->assertCount(5, $proxies);
         $this->assertCount(5, $types);
 
         // Get the middle 10 data sets with large limit (of 15 total).
         list($proxies, $types) = lti_get_lti_types_and_proxies(10, 2, true);
 
+        $this->assertDebuggingCalled();
         $this->assertCount(3, $proxies);
         $this->assertCount(7, $types);
 
         // Get the last 5 data sets with large limit (of 15 total).
         list($proxies, $types) = lti_get_lti_types_and_proxies(50, 10, true);
 
+        $this->assertDebuggingCalled();
         $this->assertCount(0, $proxies);
         $this->assertCount(5, $types);
     }
@@ -2161,6 +2208,7 @@ MwIDAQAB
         $this->generate_tool_types_and_proxies(10, 5);
 
         $totalcount = lti_get_lti_types_and_proxies_count();
+        $this->assertDebuggingCalled();
         $this->assertEquals(25, $totalcount); // 10 types, 15 proxies.
     }
 
@@ -2173,6 +2221,7 @@ MwIDAQAB
         $this->generate_tool_types_and_proxies(10, 5);
 
         $orphanedcount = lti_get_lti_types_and_proxies_count(true);
+        $this->assertDebuggingCalled();
         $this->assertEquals(15, $orphanedcount); // 10 types, 5 proxies.
     }
 
@@ -2185,6 +2234,7 @@ MwIDAQAB
         ['proxies' => $proxies, 'types' => $types] = $this->generate_tool_types_and_proxies(10, 5);
 
         $countwithproxyid = lti_get_lti_types_and_proxies_count(false, $proxies[0]->id);
+        $this->assertDebuggingCalled();
         $this->assertEquals(16, $countwithproxyid); // 1 type, 15 proxies.
     }
 
@@ -2222,8 +2272,8 @@ MwIDAQAB
         $configbase->lti_sendname = LTI_SETTING_NEVER;
         $configbase->lti_sendemailaddr = LTI_SETTING_NEVER;
         $mergedconfig = (object) array_merge( (array) $configbase, (array) $config);
-        $typeid = lti_add_type($type, $mergedconfig);
-        return lti_get_type($typeid);
+        $typeid = \core_ltix\types_helper::add_type($type, $mergedconfig);
+        return \core_ltix\types_helper::get_type($typeid);
     }
 
     /**
@@ -2370,12 +2420,12 @@ MwIDAQAB
         // No tools are available.
         $this->setUser($teacher);
         $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        assign_capability('mod/lti:addpreconfiguredinstance', CAP_PROHIBIT, $teacherrole->id,
+        assign_capability('moodle/ltix:addpreconfiguredinstance', CAP_PROHIBIT, $teacherrole->id,
             \core\context\course::instance($course->id));
         $coursetooltypes = lti_get_lti_types_by_course($course->id);
         $this->assertDebuggingCalled();
         $this->assertCount(0, $coursetooltypes);
-        $this->unassignUserCapability('mod/lti:addpreconfiguredinstance', (\core\context\course::instance($course->id))->id,
+        $this->unassignUserCapability('moodle/ltix:addpreconfiguredinstance', (\core\context\course::instance($course->id))->id,
             $teacherrole->id);
     }
 }

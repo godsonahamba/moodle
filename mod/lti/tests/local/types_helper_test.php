@@ -114,6 +114,7 @@ class types_helper_test extends mod_lti_testcase {
         // Request using the default 'coursevisible' param will include all tools except the one configured as "Do not show" and
         // the tool restricted to category 2.
         $coursetooltypes = types_helper::get_lti_types_by_course($course->id, $teacher->id);
+        $this->assertDebuggingCalled();
         $this->assertCount(3, $coursetooltypes);
         $expected = [
             'http://example.com/tool/2',
@@ -128,6 +129,7 @@ class types_helper_test extends mod_lti_testcase {
         // Request for only those tools configured to show in the activity chooser for the teacher.
         $coursetooltypes = types_helper::get_lti_types_by_course($course->id, $teacher->id,
             [LTI_COURSEVISIBLE_ACTIVITYCHOOSER]);
+        $this->assertDebuggingCalled();
         $this->assertCount(2, $coursetooltypes);
         $expected = [
             'http://example.com/tool/3',
@@ -141,6 +143,7 @@ class types_helper_test extends mod_lti_testcase {
         // Request for only those tools configured to show as a preconfigured tool for the teacher.
         $coursetooltypes = types_helper::get_lti_types_by_course($course->id, $teacher->id,
             [LTI_COURSEVISIBLE_PRECONFIGURED]);
+        $this->assertDebuggingCalled();
         $this->assertCount(1, $coursetooltypes);
         $expected = [
             'http://example.com/tool/2',
@@ -150,6 +153,7 @@ class types_helper_test extends mod_lti_testcase {
 
         // Request for teacher2 in course2 (course category 2).
         $coursetooltypes = types_helper::get_lti_types_by_course($course2->id, $teacher2->id);
+        $this->assertDebuggingCalled();
         $this->assertCount(3, $coursetooltypes);
         $expected = [
             'http://example.com/tool/2',
@@ -163,9 +167,10 @@ class types_helper_test extends mod_lti_testcase {
 
         // Request for a teacher who cannot use preconfigured tools in the course.
         $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        assign_capability('mod/lti:addpreconfiguredinstance', CAP_PROHIBIT, $teacherrole->id,
+        assign_capability('moodle/ltix:addpreconfiguredinstance', CAP_PROHIBIT, $teacherrole->id,
             \core\context\course::instance($course->id));
         $coursetooltypes = types_helper::get_lti_types_by_course($course->id, $teacher->id);
+        $this->assertDebuggingCalled();
         $this->assertCount(0, $coursetooltypes);
     }
 
@@ -235,19 +240,23 @@ class types_helper_test extends mod_lti_testcase {
 
         // LTI_COURSEVISIBLE_NO can't be updated.
         $result = types_helper::override_type_showinactivitychooser($tool1id, $course->id, $context, true);
+        $this->assertDebuggingCalled();
         $this->assertFalse($result);
 
         // Tool not exist.
         $result = types_helper::override_type_showinactivitychooser($tool5id + 1, $course->id, $context, false);
+        $this->assertDebuggingCalled();
         $this->assertFalse($result);
 
         $result = types_helper::override_type_showinactivitychooser($tool2id, $course->id, $context, true);
+        $this->assertDebuggingCalled();
         $this->assertTrue($result);
         $coursevisibleoverriden = $DB->get_field('lti_coursevisible', 'coursevisible',
             ['typeid' => $tool2id, 'courseid' => $course->id]);
         $this->assertEquals(LTI_COURSEVISIBLE_ACTIVITYCHOOSER, $coursevisibleoverriden);
 
         $result = types_helper::override_type_showinactivitychooser($tool3id, $course->id, $context, false);
+        $this->assertDebuggingCalled();
         $this->assertTrue($result);
         $coursevisible = $DB->get_field('lti_types', 'coursevisible', ['id' => $tool3id]);
         $this->assertEquals(LTI_COURSEVISIBLE_PRECONFIGURED, $coursevisible);
@@ -255,10 +264,11 @@ class types_helper_test extends mod_lti_testcase {
         // Restricted category no allowed.
         $this->expectException('moodle_exception');
         $this->expectExceptionMessage('You are not allowed to change this setting for this tool.');
-        types_helper::override_type_showinactivitychooser($tool4id, $course->id, $context, false);
+        \core_ltix\types_helper::override_type_showinactivitychooser($tool4id, $course->id, $context, false);
 
         // Restricted category allowed.
         $result = types_helper::override_type_showinactivitychooser($tool5id, $course->id, $context, false);
+        $this->assertDebuggingCalled();
         $this->assertTrue($result);
         $coursevisibleoverriden = $DB->get_field('lti_coursevisible', 'coursevisible',
             ['typeid' => $tool5id, 'courseid' => $course->id]);
@@ -266,7 +276,7 @@ class types_helper_test extends mod_lti_testcase {
 
         $this->setUser($teacher2);
         $this->expectException(\required_capability_exception::class);
-        types_helper::override_type_showinactivitychooser($tool5id, $course->id, $context, false);
+        \core_ltix\types_helper::override_type_showinactivitychooser($tool5id, $course->id, $context, false);
     }
 
 }

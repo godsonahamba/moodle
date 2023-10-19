@@ -437,7 +437,7 @@ class lib_test extends \advanced_testcase {
 
         // Removing the capability to use preconfigured (site or course level) tools, should result in no content items.
         $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        assign_capability('mod/lti:addpreconfiguredinstance', CAP_PROHIBIT, $teacherrole->id,
+        assign_capability('moodle/ltix:addpreconfiguredinstance', CAP_PROHIBIT, $teacherrole->id,
             \core\context\course::instance($course2->id));
         $course2items = lti_get_course_content_items($defaultmodulecontentitem, $teacher2, $course2);
         $this->assertCount(0, $course2items);
