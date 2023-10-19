@@ -53,15 +53,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' or ($_SERVER['REQUEST_METHOD'] === 'GE
                 $registrationpayload = json_decode(file_get_contents('php://input'), true);
                 $config = registration_helper::get()->registration_to_config($registrationpayload, $tokenres['clientid']);
                 if ($type->id) {
-                    lti_update_type($type, clone $config);
+                    \core_ltix\types_helper::update_type($type, clone $config);
                     $typeid = $type->id;
                 } else {
-                    $typeid = lti_add_type($type, clone $config);
+                    $typeid = \core_ltix\types_helper::add_type($type, clone $config);
                 }
                 header('Content-Type: application/json; charset=utf-8');
                 $message = json_encode(registration_helper::get()->config_to_registration((object)$config, $typeid));
             } else if ($type) {
-                $config = lti_get_type_config($type->id);
+                $config = \core_ltix\types_helper::get_type_config($type->id);
                 header('Content-Type: application/json; charset=utf-8');
                 $message = json_encode(registration_helper::get()->config_to_registration((object)$config, $type->id, $type));
             } else {
