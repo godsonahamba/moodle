@@ -2420,12 +2420,12 @@ MwIDAQAB
         // No tools are available.
         $this->setUser($teacher);
         $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        assign_capability('mod/lti:addpreconfiguredinstance', CAP_PROHIBIT, $teacherrole->id,
+        assign_capability('moodle/ltix:addpreconfiguredinstance', CAP_PROHIBIT, $teacherrole->id,
             \core\context\course::instance($course->id));
         $coursetooltypes = lti_get_lti_types_by_course($course->id);
         $this->assertDebuggingCalled();
         $this->assertCount(0, $coursetooltypes);
-        $this->unassignUserCapability('mod/lti:addpreconfiguredinstance', (\core\context\course::instance($course->id))->id,
+        $this->unassignUserCapability('moodle/ltix:addpreconfiguredinstance', (\core\context\course::instance($course->id))->id,
             $teacherrole->id);
     }
 }

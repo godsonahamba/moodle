@@ -114,6 +114,7 @@ class types_helper_test extends mod_lti_testcase {
         // Request using the default 'coursevisible' param will include all tools except the one configured as "Do not show" and
         // the tool restricted to category 2.
         $coursetooltypes = types_helper::get_lti_types_by_course($course->id, $teacher->id);
+        $this->assertDebuggingCalled();
         $this->assertCount(3, $coursetooltypes);
         $expected = [
             'http://example.com/tool/2',
@@ -128,6 +129,7 @@ class types_helper_test extends mod_lti_testcase {
         // Request for only those tools configured to show in the activity chooser for the teacher.
         $coursetooltypes = types_helper::get_lti_types_by_course($course->id, $teacher->id,
             [LTI_COURSEVISIBLE_ACTIVITYCHOOSER]);
+        $this->assertDebuggingCalled();
         $this->assertCount(2, $coursetooltypes);
         $expected = [
             'http://example.com/tool/3',
@@ -141,6 +143,7 @@ class types_helper_test extends mod_lti_testcase {
         // Request for only those tools configured to show as a preconfigured tool for the teacher.
         $coursetooltypes = types_helper::get_lti_types_by_course($course->id, $teacher->id,
             [LTI_COURSEVISIBLE_PRECONFIGURED]);
+        $this->assertDebuggingCalled();
         $this->assertCount(1, $coursetooltypes);
         $expected = [
             'http://example.com/tool/2',
@@ -150,6 +153,7 @@ class types_helper_test extends mod_lti_testcase {
 
         // Request for teacher2 in course2 (course category 2).
         $coursetooltypes = types_helper::get_lti_types_by_course($course2->id, $teacher2->id);
+        $this->assertDebuggingCalled();
         $this->assertCount(3, $coursetooltypes);
         $expected = [
             'http://example.com/tool/2',
@@ -163,9 +167,10 @@ class types_helper_test extends mod_lti_testcase {
 
         // Request for a teacher who cannot use preconfigured tools in the course.
         $teacherrole = $DB->get_record('role', array('shortname' => 'editingteacher'));
-        assign_capability('mod/lti:addpreconfiguredinstance', CAP_PROHIBIT, $teacherrole->id,
+        assign_capability('moodle/ltix:addpreconfiguredinstance', CAP_PROHIBIT, $teacherrole->id,
             \core\context\course::instance($course->id));
         $coursetooltypes = types_helper::get_lti_types_by_course($course->id, $teacher->id);
+        $this->assertDebuggingCalled();
         $this->assertCount(0, $coursetooltypes);
     }
 

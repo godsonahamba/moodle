@@ -324,7 +324,7 @@ class mod_lti_mod_form extends moodleform_mod {
         // Determine whether this tool instance is using a domain-matched site tool which is not visible at the course level.
         // In such a case, the instance has a typeid (the site tool) and toolurl (the url used to domain match the site tool) set,
         // and the type still exists (is not deleted).
-        $instancetypes = lti_get_types_for_add_instance();
+        $instancetypes = \core_ltix\types_helper::get_types_for_add_instance();
         $matchestoolnotavailabletocourse = false;
         if (!$manualinstance && !empty($this->current->toolurl)) {
             if (\core_ltix\types_helper::get_type_config($this->current->typeid)) {
