@@ -40,8 +40,11 @@ class types_helper {
      * @return \stdClass[] the array of tool type objects.
      */
     public static function get_lti_types_by_course(int $courseid, int $userid, array $coursevisible = []): array {
-        debugging(__FUNCTION__ . '() is deprecated. Please use \core_ltix\types_helper::get_lti_types_by_course() instead.',
-            DEBUG_DEVELOPER);
+        global $DB, $SITE;
+
+        if (!has_capability('mod/lti:addpreconfiguredinstance', course::instance($courseid), $userid)) {
+            return [];
+        }
 
         return \core_ltix\types_helper::get_lti_types_by_course($courseid, $userid, $coursevisible);
     }
