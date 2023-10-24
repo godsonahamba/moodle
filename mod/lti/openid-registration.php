@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' or ($_SERVER['REQUEST_METHOD'] === 'GE
                 $registrationpayload = json_decode(file_get_contents('php://input'), true);
                 $config = registration_helper::get()->registration_to_config($registrationpayload, $tokenres['clientid']);
                 if ($type->id) {
-                    \core_ltix\types_helper::update_type($type, clone $config);
+                    \core_ltix\types_helper:::update_type($type, clone $config);
                     $typeid = $type->id;
                 } else {
                     $typeid = \core_ltix\types_helper::add_type($type, clone $config);

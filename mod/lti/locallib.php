@@ -572,8 +572,8 @@ function lti_get_launch_data($instance, $nonce = '', $messagetype = 'basic-lti-l
             $serviceparameters = $service->get_launch_parameters('basic-lti-launch-request',
                     $course->id, $USER->id , $typeid, $instance->id);
             foreach ($serviceparameters as $paramkey => $paramvalue) {
-                $requestparams['custom_' . $paramkey] = \core_ltix\tool_helper::parse_custom_parameter($toolproxy, $tool,
-                    $requestparams, $paramvalue, $islti2);
+                $requestparams['custom_' . $paramkey] = \core_ltix\tool_helper::parse_custom_parameter($toolproxy, $tool, $requestparams, $paramvalue,
+                    $islti2);
             }
         }
     }
@@ -961,8 +961,7 @@ function lti_build_custom_parameters($toolproxy, $tool, $instance, $params, $cus
             $custom = array_merge($custom, \core_ltix\tool_helper::get_custom_parameters($toolproxy, $tool, $params, $settings));
             if (!empty($instance->id)) {
                 $settings = \core_ltix\tool_helper::get_tool_settings($tool->toolproxyid, $instance->course, $instance->id);
-                $custom = array_merge($custom, \core_ltix\tool_helper::get_custom_parameters($toolproxy, $tool, $params,
-                    $settings));
+                $custom = array_merge($custom, \core_ltix\tool_helper::get_custom_parameters($toolproxy, $tool, $params, $settings));
             }
         }
     }
@@ -1101,8 +1100,8 @@ function lti_build_content_item_selection_request($id, $course, moodle_url $retu
             $serviceparameters = $service->get_launch_parameters('ContentItemSelectionRequest',
                 $course->id, $USER->id , $id);
             foreach ($serviceparameters as $paramkey => $paramvalue) {
-                $requestparams['custom_' . $paramkey] = \core_ltix\tool_helper::parse_custom_parameter($toolproxy, $tool,
-                    $requestparams, $paramvalue, $islti2);
+                $requestparams['custom_' . $paramkey] = \core_ltix\tool_helper::parse_custom_parameter($toolproxy, $tool, $requestparams, $paramvalue,
+                    $islti2);
             }
         }
     }
@@ -1351,8 +1350,7 @@ function lti_tool_configuration_from_content_item($typeid, $messagetype, $ltiver
     debugging(__FUNCTION__ . '() is deprecated. Please use \core_ltix\tool_helper::tool_configuration_from_content_item() instead.',
         DEBUG_DEVELOPER);
 
-    return \core_ltix\tool_helper::tool_configuration_from_content_item($typeid, $messagetype, $ltiversion, $consumerkey,
-        $contentitemsjson);
+    return \core_ltix\tool_helper::tool_configuration_from_content_item($typeid, $messagetype, $ltiversion, $consumerkey, $contentitemsjson);
 }
 
 /**
@@ -1838,26 +1836,20 @@ function lti_get_lti_types_by_course($courseid, $coursevisible = null) {
         DEBUG_DEVELOPER);
 
     global $USER;
-    return \mod_lti\local\types_helper::get_lti_types_by_course($courseid, $USER->id, $coursevisible ?? []);
+    return \core_ltix\types_helper::get_lti_types_by_course($courseid, $USER->id, $coursevisible ?? []);
 }
 
 /**
  * Returns tool types for lti add instance and edit page
  *
+ * @deprecated since Moodle 4.4
  * @return array Array of lti types
  */
 function lti_get_types_for_add_instance() {
-    global $COURSE, $USER;
+    debugging(__FUNCTION__ . '() is deprecated. Please use \core_ltix\types_helper::get_types_for_add_instance() instead.',
+        DEBUG_DEVELOPER);
 
-    // Always return the 'manual' type option, despite manual config being deprecated, so that we have it for legacy instances.
-    $types = [(object) ['name' => get_string('automatic', 'lti'), 'course' => 0, 'toolproxyid' => null]];
-
-    $preconfiguredtypes = \mod_lti\local\types_helper::get_lti_types_by_course($COURSE->id, $USER->id);
-    foreach ($preconfiguredtypes as $type) {
-        $types[$type->id] = $type;
-    }
-
-    return $types;
+    return \core_ltix\types_helper::get_types_for_add_instance();
 }
 
 /**
@@ -1870,7 +1862,7 @@ function lti_get_types_for_add_instance() {
 function lti_get_configured_types($courseid, $sectionreturn = 0) {
     global $OUTPUT, $USER;
     $types = [];
-    $preconfiguredtypes = \mod_lti\local\types_helper::get_lti_types_by_course($courseid, $USER->id,
+    $preconfiguredtypes = \core_ltix\types_helper::get_lti_types_by_course($courseid, $USER->id,
         [LTI_COURSEVISIBLE_ACTIVITYCHOOSER]);
 
     foreach ($preconfiguredtypes as $ltitype) {
@@ -2193,8 +2185,7 @@ function lti_get_tool_proxy_from_guid($toolproxyguid) {
  * @return array The record of the tool proxy with this url
  */
 function lti_get_tool_proxies_from_registration_url($regurl) {
-    debugging(__FUNCTION__ . '() is deprecated. ' .
-        'Please use \core_ltix\tool_helper::get_tool_proxies_from_registration_url() instead.',
+    debugging(__FUNCTION__ . '() is deprecated. Please use \core_ltix\tool_helper::get_tool_proxies_from_registration_url() instead.',
         DEBUG_DEVELOPER);
 
     return \core_ltix\tool_helper::get_tool_proxies_from_registration_url($regurl);
