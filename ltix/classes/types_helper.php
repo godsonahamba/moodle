@@ -48,7 +48,7 @@ class types_helper {
      *        [LTI_COURSEVISIBLE_PRECONFIGURED, LTI_COURSEVISIBLE_ACTIVITYCHOOSER] if omitted.
      * @return \stdClass[] the array of tool type objects.
      */
-    public static function get_lti_types_by_course(int $courseid, int $userid, array $coursevisible = []): array {
+    public static function get_lti_types_by_course(int $courseid, array $coursevisible = []): array {
         global $DB, $SITE;
 
         if (empty($coursevisible)) {
