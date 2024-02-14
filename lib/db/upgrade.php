@@ -863,26 +863,6 @@ function xmldb_main_upgrade($oldversion) {
 
         upgrade_main_savepoint(true, 2023120100.01);
     }
-    if ($oldversion < 2023122000.00) {
-        // Move mod_lti keys into new core lti config.
-        if (!empty(get_config('mod_lti', 'kid')) && !empty(get_config('mod_lti', 'privatekey'))) {
-            set_config('kid',  get_config('mod_lti', 'kid'), 'core_ltix');
-            set_config('privatekey',  get_config('mod_lti', 'privatekey'), 'core_ltix');
-            set_config('kid', null, 'mod_lti');
-            set_config('privatekey', null, 'mod_lti');
-        }
-
-        $servicetypes = ['basicoutcomes', 'memberships','profile', 'toolproxy', 'toolsettings'];
-        foreach ($servicetypes as $type) {
-            $versionfile = $CFG->dirroot . "mod/lti/service/{$type}/version.php";
-
-            if (!file_exists($versionfile)) {
-                uninstall_plugin('ltiservice', $type);
-            }
-        }
-        // Main savepoint reached.
-        upgrade_main_savepoint(true, 2023122000.00);
-    }
 
     if ($oldversion < 2023121800.02) {
         // Define field attemptsavailable to be added to task_adhoc.
@@ -1113,19 +1093,25 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2024022300.02);
     }
 
-    if ($oldversion < 2024021500.01) {
+    if ($oldversion < 2024030500.01) {
 
-        // Define field firststartingtime to be added to task_adhoc.
-        $table = new xmldb_table('task_adhoc');
-        $field = new xmldb_field('firststartingtime', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'attemptsavailable');
+        // Get all "select" custom field shortnames.
+        $fieldshortnames = $DB->get_fieldset('customfield_field', 'shortname', ['type' => 'select']);
 
-        // Conditionally launch add field firststartingtime.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
+        // Ensure any used in custom reports columns are not using integer type aggregation.
+        foreach ($fieldshortnames as $fieldshortname) {
+            $DB->execute("
+                UPDATE {reportbuilder_column}
+                   SET aggregation = NULL
+                 WHERE " . $DB->sql_like('uniqueidentifier', ':uniqueidentifier', false) . "
+                   AND aggregation IN ('avg', 'max', 'min', 'sum')
+            ", [
+                'uniqueidentifier' => '%' . $DB->sql_like_escape(":customfield_{$fieldshortname}"),
+            ]);
         }
 
         // Main savepoint reached.
-        upgrade_main_savepoint(true, 2024021500.01);
+        upgrade_main_savepoint(true, 2024030500.01);
     }
 
     return true;
