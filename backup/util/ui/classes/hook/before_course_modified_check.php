@@ -14,47 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace core_backup\hook;
-
-use core\hook\described_hook;
+namespace core\hook\backup;
 
 /**
  * Get a list of event names which are excluded to trigger from course changes in automated backup.
  *
- * @package    core_backup
+ * @package    core
  * @copyright  2023 Tomo Tsuyuki <tomotsuyuki@catalyst-au.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class before_course_modified_check implements described_hook {
+#[\core\attribute\label('Get a list of event names which are excluded to trigger from course changes in automated backup.')]
+#[\core\attribute\tags('backup')]
+final class get_excluded_events {
     /**
      * @var string[] Array of event names.
      */
     private $events = [];
 
     /**
-     * Describes the hook purpose.
-     *
-     * @return string
-     */
-    public static function get_hook_description(): string {
-        return 'Get a list of event names which are excluded to trigger from course changes in automated backup.';
-    }
-
-    /**
-     * List of tags that describe this hook.
-     *
-     * @return string[]
-     */
-    public static function get_hook_tags(): array {
-        return ['backup'];
-    }
-
-    /**
      * Add an array of event names which are excluded to trigger from course changes in automated backup.
+     * This is set from plugin hook.
+     * e.g. ['\local_course\event\update', '\local_course\event\sync']
      *
-     * @param string $events,... Array of event name strings
+     * @param string[] $events Array of event name strings
+     * @return void
      */
-    public function exclude_events(string ...$events): void {
+    public function add_events(array $events): void {
         $this->events = array_merge($this->events, $events);
     }
 
@@ -64,7 +49,7 @@ final class before_course_modified_check implements described_hook {
      *
      * @return array
      */
-    public function get_excluded_events(): array {
+    public function get_events(): array {
         return $this->events;
     }
 }
