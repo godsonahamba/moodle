@@ -300,8 +300,6 @@ class mod_lti_mod_form extends moodleform_mod {
             'toolurl',
             'securetoolurl',
             'launchcontainer',
-            'resourcekey',
-            'password',
             'instructorcustomparameters',
             'icon',
             'secureicon',
