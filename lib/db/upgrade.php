@@ -1095,6 +1095,21 @@ function xmldb_main_upgrade($oldversion) {
 
     if ($oldversion < 2024030500.01) {
 
+        // Define field firststartingtime to be added to task_adhoc.
+        $table = new xmldb_table('task_adhoc');
+        $field = new xmldb_field('firststartingtime', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'attemptsavailable');
+
+        // Conditionally launch add field firststartingtime.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+            // Main savepoint reached.
+            upgrade_main_savepoint(true, 2024030500.01);
+        }
+
+    }
+
+    if ($oldversion < 2024030500.02) {
+
         // Get all "select" custom field shortnames.
         $fieldshortnames = $DB->get_fieldset('customfield_field', 'shortname', ['type' => 'select']);
 
@@ -1111,7 +1126,7 @@ function xmldb_main_upgrade($oldversion) {
         }
 
         // Main savepoint reached.
-        upgrade_main_savepoint(true, 2024030500.01);
+        upgrade_main_savepoint(true, 2024030500.02);
     }
 
     return true;
